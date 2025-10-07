@@ -45,10 +45,6 @@ What needs to be saved?
 
 **Tables**
 
-* Users
-  * User Id
-  * Name
-  * Email
 * Time slots
   * Time Slot Id
   * Start Time
@@ -85,6 +81,17 @@ What needs to be saved?
 * TimeSlotService
 * MeetingService
 * CalendarService
+
+Assumptions
+* TimeSlots are not shared between users
+* Only owners can modify a TimeSlot
+* The users exist in a different service, this will only save a reference to that.
+* 
+* 
+* 
+* 
+* 
+* 
 
 To complain with this:
 

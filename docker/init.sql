@@ -2,17 +2,11 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TABLE IF NOT EXISTS public.users (
-    user_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name         VARCHAR(255) NOT NULL,
-    email        VARCHAR(255) NOT NULL UNIQUE
-);
-
 CREATE TABLE IF NOT EXISTS public.time_slots (
     time_slot_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     start_time   TIMESTAMP NOT NULL,
     end_time     TIMESTAMP NOT NULL,
-    user_id      UUID NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
+    user_id      UUID NOT NULL,
     CHECK (end_time > start_time)
 );
 
