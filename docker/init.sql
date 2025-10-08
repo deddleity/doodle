@@ -1,5 +1,3 @@
-\connect mydatabase
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS public.time_slots (
