@@ -7,4 +7,5 @@ public class TimeSlotDto {
     private String id;
     private String startTime;
     private String endTime;
+    private Boolean statusId;
 }

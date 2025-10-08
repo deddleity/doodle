@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.doodle.klein.dtos.TimeSlotDto;
 import org.doodle.klein.entities.TimeSlotEntity;
+import org.doodle.klein.entities.TimeSlotStateEntity;
+import org.doodle.klein.repositories.TimeSlotStateRepository;
 import org.doodle.klein.repositories.TimeSlotsRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +23,11 @@ import java.util.UUID;
 public class TimeSlotsService {
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("H:mm");
+    private static final String STATE_ENABLED = "ENABLED";
+    private static final String STATE_DISABLED = "DISABLED";
 
     private final TimeSlotsRepository timeSlotRepository;
+    private final TimeSlotStateRepository timeSlotStateRepository;
 
     public TimeSlotEntity createTimeSlot(TimeSlotDto timeSlotDto, UUID userId) {
         try {
@@ -92,6 +97,40 @@ public class TimeSlotsService {
             log.info("Deleted time slot id={} for userId={}", timeSlotId, userId);
         } catch (Exception e) {
             log.error("Failed to delete time slot id={} for userId={}: {}", timeSlotId, userId, e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public boolean toggleTimeSlotStatus(UUID timeSlotId, UUID userId) {
+        try {
+            // Validate ownership
+            TimeSlotEntity existing = timeSlotRepository.findById(timeSlotId)
+                    .orElseThrow(() -> new IllegalArgumentException("Time slot not found"));
+            if (!existing.getUserId().equals(userId)) {
+                throw new IllegalArgumentException("Forbidden: time slot does not belong to user");
+            }
+
+            Optional<TimeSlotStateEntity> stateOpt = timeSlotStateRepository.findById(timeSlotId);
+            String newState;
+            if (stateOpt.isPresent()) {
+                var current = stateOpt.get();
+                newState = STATE_ENABLED.equalsIgnoreCase(current.getState()) ? STATE_DISABLED : STATE_ENABLED;
+                current.setState(newState);
+                timeSlotStateRepository.save(current);
+            } else {
+                // Default to DISABLED when absent; toggling makes it ENABLED
+                newState = STATE_ENABLED;
+                TimeSlotStateEntity toSave = TimeSlotStateEntity.builder()
+                        .timeSlotId(timeSlotId)
+                        .state(newState)
+                        .build();
+                timeSlotStateRepository.save(toSave);
+            }
+            boolean enabled = STATE_ENABLED.equalsIgnoreCase(newState);
+            log.info("Toggled state for time slot id={} to {} (enabled={})", timeSlotId, newState, enabled);
+            return enabled;
+        } catch (Exception e) {
+            log.error("Failed to toggle status for time slot id={} and userId={}: {}", timeSlotId, userId, e.getMessage(), e);
             throw e;
         }
     }

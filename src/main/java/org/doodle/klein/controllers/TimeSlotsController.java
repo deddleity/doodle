@@ -95,4 +95,28 @@ public class TimeSlotsController {
         }
     }
 
+    @PostMapping("/statusToggle")
+    public ResponseEntity<TimeSlotResponse> toggleStatus(@RequestBody TimeSlotDto timeSlotDto, HttpServletRequest request) {
+        TimeSlotResponse response = new TimeSlotResponse();
+        try {
+            var userId = authorizaition.resolveUserId(request);
+            var id = UUID.fromString(timeSlotDto.getId());
+            boolean enabled = timeSlotsService.toggleTimeSlotStatus(id, userId);
+
+            TimeSlotDto dto = new TimeSlotDto();
+            dto.setId(id.toString());
+            dto.setStatusId(enabled);
+
+            response.setTimeSlot(dto);
+            response.setStatus("OK");
+            response.setMessage("Time slot state toggled successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error toggling time slot state: {}", e.getMessage(), e);
+            response.setStatus("ERROR");
+            response.setError(e.getMessage());
+            response.setMessage("Failed to toggle time slot state");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }
