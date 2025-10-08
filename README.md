@@ -87,11 +87,9 @@ Assumptions
 * Only owners can modify a TimeSlot
 * The users exist in a different service, this will only save a reference to that.
 * 
-* 
-* 
-* 
-* 
-* 
+* I spent already around 4 hours on the project, I stop here.
+
+  Thanks for reading and evaluating the code
 
 To complain with this:
 
